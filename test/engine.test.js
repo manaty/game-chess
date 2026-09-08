@@ -122,16 +122,16 @@ test('threefold repetition draws', () => {
   assert.equal(game.winner, null);
 });
 
-test('blitz clocks press after the first move and flag falls', () => {
+test('blitz clocks run from the start and flag falls', () => {
   const game = new Chess(players(), null, { minutes: 5 });
   const white = game.players.find(player => player.color === 'w').id;
   const black = game.players.find(player => player.color === 'b').id;
   game.advance(2);
-  assert.equal(game.clocks.w, 5 * 60000, 'white is not pressed before any move');
+  assert.equal(game.clocks.w, 5 * 60000 - 2000, 'white cannot stall before the first move');
   game.move(white, { from: 'e2', to: 'e4' });
   game.advance(1);
   assert.equal(game.clocks.b, 5 * 60000 - 1000, 'black presses after white\'s first move');
-  assert.equal(game.clocks.w, 5 * 60000);
+  assert.equal(game.clocks.w, 5 * 60000 - 2000);
   game.clocks.b = 100;
   game.advance(1);
   assert.equal(game.winner, white);
@@ -152,7 +152,8 @@ test('engine preserves the match on restore', () => {
   const restored = new Chess(players(), game.save(), {});
   assert.deepEqual(restored.snapshot(), before);
   const view = restored.snapshot(white);
-  assert.equal(view.legal.includes('d4d5') || view.legal.includes('c2c4') || true, true);
+  assert.ok(view.legal.includes('c2c4'));
+  assert.ok(!view.legal.includes('d4d5'), 'a pawn cannot capture straight ahead');
   restored.advance(2);
   assert.ok(restored.snapshot().whiteMs < before.whiteMs, 'the pressed clock survives the restore');
 });

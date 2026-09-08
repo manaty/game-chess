@@ -14,7 +14,7 @@ const on = (f, r) => f >= 0 && f < 8 && r >= 0 && r < 8;
 const isWhite = piece => piece >= 'A' && piece <= 'Z';
 
 export function parseFen(fen) {
-  const [placement, turn, castling, ep] = fen.split(' ');
+  const [placement, turn, castling, ep, halfmove = '0', fullmove = '1'] = fen.split(' ');
   const board = new Array(64).fill('');
   let index = 0;
   for (const char of placement) {
@@ -25,7 +25,7 @@ export function parseFen(fen) {
   return {
     board, turn,
     castling: { K: castling.includes('K'), Q: castling.includes('Q'), k: castling.includes('k'), q: castling.includes('q') },
-    ep: ep && ep !== '-' ? at(ep) : -1, halfmove: 0, fullmove: 1,
+    ep: ep && ep !== '-' ? at(ep) : -1, halfmove: Number(halfmove), fullmove: Number(fullmove),
   };
 }
 
@@ -198,7 +198,8 @@ export class Chess {
   inCheck() { return attacked(this.board, this.board.indexOf(this.turn === 'w' ? 'K' : 'k'), this.turn !== 'w'); }
   positionKey() {
     return this.board.join(',') + this.turn + (this.castling.K ? 'K' : '') + (this.castling.Q ? 'Q' : '') +
-      (this.castling.k ? 'k' : '') + (this.castling.q ? 'q' : '') + (this.ep >= 0 ? square(this.ep) : '');
+      (this.castling.k ? 'k' : '') + (this.castling.q ? 'q' : '') +
+      (this.ep >= 0 && this.legal().some(move => move.epCapture) ? square(this.ep) : '');
   }
   action(id, action, value) {
     if (action !== 'move') throw new Error('invalidGameAction');
@@ -241,13 +242,16 @@ export class Chess {
   }
   advance(dt) {
     if (this.winner || this.reason) return;
-    // Clocks press once the first move is on the board, not during the intro.
-    if (this.ply >= 1) {
+    // The host advances only during play, never during intro or pause.
+    {
       this.clocks[this.turn] -= dt * 1000;
       if (this.clocks[this.turn] <= 0) {
         this.clocks[this.turn] = 0;
-        this.winner = this.players.find(player => player.color !== this.turn).id;
-        this.reason = 'timeout';
+        const opponent = this.players.find(player => player.color !== this.turn);
+        const hasPiece = this.board.some(piece => piece && piece.toUpperCase() !== 'K' && isWhite(piece) === (opponent.color === 'w'));
+        const drawn = !hasPiece || insufficientMaterial(this.board);
+        this.winner = drawn ? null : opponent.id;
+        this.reason = drawn ? 'material' : 'timeout';
         this.record('flag', { player: this.winner });
       }
     }
@@ -260,7 +264,7 @@ export class Chess {
       castling: (this.castling.K ? 'K' : '') + (this.castling.Q ? 'Q' : '') + (this.castling.k ? 'k' : '') + (this.castling.q ? 'q' : '') || '-',
       whiteMs: Math.max(0, Math.ceil(this.clocks.w)),
       blackMs: Math.max(0, Math.ceil(this.clocks.b)),
-      clockRunning: this.ply >= 1 && !this.winner && !this.reason,
+      clockRunning: !this.winner && !this.reason,
       legal: this.legal().map(move => square(move.from) + square(move.to) + (move.promotion || '')),
       lastMove: this.lastMove,
       check: !this.winner && !this.reason && this.inCheck(),

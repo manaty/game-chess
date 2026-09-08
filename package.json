@@ -1,6 +1,6 @@
 {
   "name": "@manaty/game-chess",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "license": "MIT",
   "description": "Play Chess · Blitz duel together on a shared screen, using phones as controllers. 2 players.",
@@ -15,7 +15,7 @@
     "test": "node --test test/*.test.js"
   },
   "dependencies": {
-    "@manaty/retro-museum-sdk": "https://github.com/manaty/retro-museum-sdk/archive/23d04fc7bd49ec6d0d13c255c0a725622a8b9ad1.tar.gz"
+    "@manaty/retro-museum-sdk": "https://github.com/manaty/retro-museum-sdk/archive/5ab9a0bca4fce65072deb9a99f21bfa634d7bd13.tar.gz"
   },
   "devDependencies": {
     "esbuild": "0.28.2"

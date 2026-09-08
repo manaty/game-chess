@@ -53,8 +53,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .chess-canvas {
   background: var(--board-dark); border: 1px solid var(--line); border-radius: 10px;
   width: 100%; height: auto;
-  max-width: min(92vw, 640px);
-  max-height: 88vh; max-height: 88dvh;
+  max-width: min(92vw, 640px, calc(100vh - 145px));
+  max-height: calc(100vh - 145px);
   display: block; touch-action: manipulation;
 }
 .chess-side { display: flex; flex-direction: column; gap: 10px; width: 210px; }
@@ -133,3 +133,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
   }
   .controller .chess-history { display: block; max-height: none; flex: 1; overflow: hidden; }
 }
+
+/* Compact phone header; all controls remain reachable on narrow devices. */
+.chess-header { flex-wrap: wrap; }
+@media(max-width:600px) { .chess-header { padding:6px 10px; gap:6px; } .chess-header h1 { font-size:16px; } .chess-header .brand { display:none; } .chess-header .button { padding:7px; font-size:12px; } }

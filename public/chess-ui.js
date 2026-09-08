@@ -7,10 +7,17 @@ const clock = ms => { const n = Math.ceil(Math.max(0, ms) / 1000); return `${Mat
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const EMPTY = { board: '.'.repeat(64), turn: 'w', whiteMs: 0, blackMs: 0, legal: [], history: [], players: [], events: [], check: false, winner: null, reason: null };
 
-export function createChessView(app, role, { send, notice }) {
+export function createChessView(app, role, { send, notice, preference = () => {} }) {
   let s, online = false, contentKey = null, dead = false, lastEvent = 0, rendered = '';
   let canvas, ctx, selected = null, pendingPromotion = null;
   const cache = new Map();
+  const soundKey = 'museum-sound-muted-' + role;
+  let muted = false;
+  function setPreferences(value) { if (soundKey in value) muted = value[soundKey] === '1'; }
+  app.addEventListener('click', event => {
+    if (!event.target.closest('[data-sound]')) return;
+    muted = !muted; preference(soundKey, muted ? '1' : '0'); update(s, online);
+  });
 
   const tr = (key, vars) => g(s.language, key, vars);
   const chess = () => s.party.chess || EMPTY;
@@ -31,7 +38,7 @@ export function createChessView(app, role, { send, notice }) {
     },
     beep(frequency, duration = .1, delay = 0) {
       try {
-        if (!this.context || this.context.state !== 'running') return;
+        if (muted || !this.context || this.context.state !== 'running') return;
         const at = this.context.currentTime + delay;
         const osc = this.context.createOscillator(), amp = this.context.createGain();
         osc.type = 'sine'; osc.frequency.value = frequency;
@@ -60,7 +67,7 @@ export function createChessView(app, role, { send, notice }) {
       <div class="chess-shell ${role}">
         <header class="chess-header">
           <div><div class="brand">RETRO_MUSEUM · MULTI</div><h1>${esc(g(s.language, 'title'))}</h1></div>
-          <button class="button" data-fullscreen>${esc(tr('fullscreen'))}</button>
+          <button class="button" data-sound></button><button class="button" data-fullscreen>${esc(tr('fullscreen'))}</button>
         </header>
         <div class="chess-status" role="status"></div>
         <main class="chess-stage">
@@ -264,6 +271,10 @@ export function createChessView(app, role, { send, notice }) {
     const previousMatch = s?.party?.id;
     s = state; online = connected;
     if (!app.querySelector('.chess-shell')) mount();
+    write('h1', 'textContent', tr('title'));
+    write('[data-fullscreen]', 'textContent', tr('fullscreen'));
+    write('[data-sound]', 'textContent', tr(muted ? 'soundOff' : 'soundOn'));
+    write('[data-sound]', 'ariaPressed', String(!muted));
     if (s.party.id !== previousMatch) { lastEvent = 0; selected = null; pendingPromotion = null; }
     const view = chess();
     const key = [role, s.phase, view.winner, view.reason, view.players.map(p => p.id + p.color).join(','), s.party.you, online].join(':');
@@ -289,5 +300,5 @@ export function createChessView(app, role, { send, notice }) {
     paint();
   }
 
-  return { update, dispose() { dead = true; } };
+  return { update, setPreferences, dispose() { dead = true; } };
 }

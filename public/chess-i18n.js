@@ -1,7 +1,9 @@
 // Translations as [fr, en, tl]; English is the fallback.
 const WORDS = {
+  soundOn: ['Son activé', 'Sound on', 'May tunog'],
+  soundOff: ['Son coupé', 'Sound off', 'Walang tunog'],
   title: ['Échecs · Duel blitz', 'Chess · Blitz duel', 'Ahedres · Blitz duel'],
-  rules: ['Un duel d\u2019échecs à deux sur l\u2019écran partagé : chaque téléphone affiche le plateau vu de son joueur. Règles complètes — roque, prise en passant, promotion — et une horloge blitz par joueur qui démarre après le premier coup. Touchez une pièce, puis sa destination.', 'A two-player chess duel on the shared screen: each phone shows the board from its player\u2019s side. Full rules — castling, en passant, promotion — and a blitz clock per player that starts after the first move. Tap a piece, then its destination.', 'Duel na ahedres sa shared screen: makikita ng bawat telepono ang board mula sa panig ng manlalaro. Kumpletong patakaran at may blitz na orasan bawat manlalaro na nagsisimula pagkatapos ng unang hakbang. Pindutin ang piyesa, tapos ang destinasyon.'],
+  rules: ['Touchez une pièce puis sa destination. Roque, prise en passant et promotion disponibles. Horloges dès le départ. La triple répétition et les 50 coups donnent automatiquement une nulle ; ce duel convivial ne suit pas toutes les procédures de tournoi.', 'Tap a piece, then its destination. Castling, en passant and promotion supported. Clocks run from the start. Threefold repetition and 50 moves draw automatically; this casual duel does not implement every tournament procedure.', 'Pindutin ang piyesa, tapos ang destinasyon. May castling, en passant at promosyon. Tumatakbo agad ang orasan. Awtomatikong tabla sa tatlong ulit na posisyon at 50 hakbang; hindi ito kumpletong mga tuntunin ng torneo.'],
   players: ['{n} joueurs', '{n} players', '{n} manlalaro'],
   player: ['Joueur {n}', 'Player {n}', 'Manlalaro {n}'],
   you: ['vous', 'you', 'ikaw'],
