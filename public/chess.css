@@ -137,3 +137,42 @@ button { font: inherit; color: inherit; cursor: pointer; }
 /* Compact phone header; all controls remain reachable on narrow devices. */
 .chess-header { flex-wrap: wrap; }
 @media(max-width:600px) { .chess-header { padding:6px 10px; gap:6px; } .chess-header h1 { font-size:16px; } .chess-header .brand { display:none; } .chess-header .button { padding:7px; font-size:12px; } }
+
+/* Emerald club: a lit board, quiet surroundings and prominent clocks. */
+:root{--ink:#f0ecda;--muted:#a2b9b0;--bg:#101f23;--panel:#182b2e;--panel-2:#223b3e;--line:#36514f;--accent:#9ce2c6;--gold:#edcc86}
+body{background:radial-gradient(ellipse at 40% 38%,#31534a 0,transparent 58%),radial-gradient(ellipse at 95% 5%,#554a2b55,transparent 42%),#101f23}
+.chess-header{background:#102125bb;padding:14px 24px;border-bottom:1px solid #c8c8a528;gap:10px}
+.chess-header>div:first-child{flex:1;min-width:0}.chess-header h1{font-family:Georgia,serif;font-weight:normal;font-size:25px;letter-spacing:.01em}
+.chess-header .brand{color:#bca879;font-size:10px;letter-spacing:.2em;margin-bottom:3px}
+.chess-header .button{background:transparent;border-color:#8aab9d45;color:#c9d7ce}
+.chess-status{text-align:center;font-size:17px;padding:9px 16px;color:#c5d9ce;min-height:40px}
+.chess-status .announce{font-size:18px}.chess-status .alert{background:#b94c4733;border:1px solid #da7770;border-radius:20px;padding:3px 12px;margin-left:8px}
+.chess-stage{gap:32px;padding:20px;align-items:center}
+.chess-canvas{border:7px solid #112c30;border-radius:5px;outline:1px solid #b49d6255;box-shadow:0 12px 0 #091b20,0 13px 0 1px #668277,0 26px 45px #0007;max-width:min(64vw,680px,calc(100vh - 210px));max-height:calc(100vh - 210px)}
+.chess-side{width:240px;flex-shrink:0;gap:15px}.chess-player{padding:16px 14px;border-radius:14px;background:linear-gradient(125deg,#2e4948,#182d32);border-color:#809e813d;flex-wrap:wrap;box-shadow:0 8px 20px #0002;transition:border-color .25s,box-shadow .25s}
+.chess-player.is-turn{border-color:#b4d8ab;box-shadow:0 0 0 1px #b4d8ab35,0 12px 24px #0003}
+.chess-player .who strong{font-size:18px}.chess-player .who small{font-size:12px}.chess-player .badge{width:38px;height:38px;font-size:28px;border-radius:9px}
+.chess-player .clock{width:100%;font-size:46px;text-align:center;line-height:1.1;letter-spacing:.03em;background:#0b2127;border:1px solid #879c7033;padding:12px;margin-top:8px;font-family:ui-monospace,Consolas,monospace}
+.chess-history{border:0;background:#0a1c2144;line-height:1.9;max-height:120px;padding:12px 16px;color:#abc5b8}.chess-history:empty{display:none}
+.chess-overlay{background:radial-gradient(ellipse at center,#244942f5,#0b1d24f5);border:1px solid #a8be8830;box-shadow:inset 0 0 90px #030e1466;border-radius:18px;animation:panel-arrive .3s ease-out;overflow-y:auto}
+.chess-overlay h2{font-family:Georgia,serif;font-size:clamp(25px,4vw,48px);font-weight:normal;max-width:760px}.chess-overlay .eyebrow{color:#d6bb80;letter-spacing:.24em}
+.chess-overlay .rules{line-height:1.7;color:#bed0c6}.chess-countdown{font-family:Georgia,serif;color:#ebd496}
+.chess-promotion .button{box-shadow:0 5px 0 #385847}.button.primary{background:linear-gradient(120deg,#d8edbc,#90d4b8);color:#153731;box-shadow:0 3px 0 #557966;border:0;font-weight:700}
+.chess-footer{background:transparent;border:0;padding:4px;min-height:6px}
+.controller .chess-header h1{font-size:17px}.controller .chess-stage{padding:10px;gap:18px}.controller .chess-canvas{border-width:4px;max-width:min(100%,calc(100vh - 250px));max-height:calc(100vh - 250px)}
+.controller .chess-side{gap:8px}.controller .chess-player{min-width:0;padding:9px;gap:6px}.controller .chess-player .who strong{font-size:13px}.controller .chess-player .who small{font-size:10px}.controller .chess-player .clock{font-size:27px;margin-top:2px;padding:6px}.controller .chess-status{padding:8px;min-height:35px}
+@media(orientation:landscape) and (max-height:520px){.controller .chess-stage{align-items:center;gap:14px;padding:8px}.controller .chess-canvas{flex:0 0 auto;width:calc(100vh - 95px);height:calc(100vh - 95px);min-width:0;max-width:65vw;max-height:none}.controller .chess-side{width:160px}.controller .chess-player{padding:6px}.controller .chess-player .clock{font-size:24px}.controller .chess-history{display:none}}
+
+/* Finite, transform-only celebrations: no ongoing render loop or flashing. */
+.victory-mark{width:88px;height:88px;color:var(--gold);filter:drop-shadow(0 8px 14px #0005);flex-shrink:0;animation:prize-arrive .6s ease-out both}
+.celebration{position:absolute;inset:0;overflow:hidden;pointer-events:none;border-radius:inherit}
+.celebration i{position:absolute;left:var(--x);top:-15px;width:8px;height:15px;border-radius:2px;background:var(--color);opacity:0;animation:confetti-fall 2.5s var(--delay) ease-out both}
+.result-scene> :not(.celebration){position:relative;z-index:1}
+@keyframes confetti-fall{0%{opacity:0;transform:translateY(-20px) rotate(0)}15%{opacity:1}100%{opacity:0;transform:translateY(650px) rotate(var(--spin))}}
+@keyframes prize-arrive{from{opacity:0;transform:translateY(15px) scale(.8)}to{opacity:1;transform:none}}
+@keyframes panel-arrive{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+button{transition:background .15s,box-shadow .15s,transform .15s}
+button:active:not(:disabled){transform:translateY(1px) scale(.98)}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}.celebration{display:none}}
+@media(max-height:500px){.victory-mark{width:45px;height:45px}.result-scene{gap:6px!important;padding:10px!important}}

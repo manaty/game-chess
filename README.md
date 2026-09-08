@@ -42,3 +42,9 @@ Version 1.0.1 fixes host completion for matches without a winner, adds persisten
 See the [game acceptance checklist](https://github.com/manaty/retro-museum-sdk/blob/main/GAME-QUALITY.md).
 
 This is casual chess: threefold repetition and fifty moves trigger an automatic draw. Draw claims, draw offers and resignation are not implemented. Basic insufficient-material cases are detected; not every possible blocked dead position or impossible-mate timeout configuration is recognized. It is not a complete FIDE tournament implementation. Rule reference: [FIDE Laws, articles 6.9 and 9](https://handbook.fide.com/chapter/E012023).
+
+## Visual edition 1.1.0
+
+Emerald and ivory board, original vector pieces with shaded relief, animated moves, prominent clocks and a trophy/confetti finish. Animations respect reduced-motion preferences and finish automatically. Unchanged server snapshots do not repaint the board.
+
+Browser checks cover 320px/390px portrait phones, landscape phones and 960px/1280px/1920px shared displays. Run `npx playwright install chromium`, then `npm run test:browser`; CI runs these checks too. Physical legacy TVs remain untested.

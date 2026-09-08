@@ -1,6 +1,8 @@
+const VICTORY = "<svg class=\"victory-mark\" viewBox=\"0 0 80 80\" aria-hidden=\"true\"><path d=\"M24 14h32v19c0 14-8 20-16 20s-16-6-16-20z\" fill=\"currentColor\"/><path d=\"M24 20H13v10c0 10 8 14 16 14M56 20h11v10c0 10-8 14-16 14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"5\"/><path d=\"M36 51h8v12h12v6H24v-6h12z\" fill=\"currentColor\"/><path d=\"m40 22 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z\" fill=\"#825521\"/></svg><div class=\"celebration\" aria-hidden=\"true\"><i style=\"--x:0%;--delay:0s;--spin:-180deg;--color:#eacb7e\"></i><i style=\"--x:47%;--delay:0.12s;--spin:180deg;--color:#8dd9c0\"></i><i style=\"--x:94%;--delay:0.24s;--spin:-180deg;--color:#e68fab\"></i><i style=\"--x:41%;--delay:0.36s;--spin:180deg;--color:#c4bcff\"></i><i style=\"--x:88%;--delay:0.48s;--spin:-180deg;--color:#eacb7e\"></i><i style=\"--x:35%;--delay:0s;--spin:180deg;--color:#8dd9c0\"></i><i style=\"--x:82%;--delay:0.12s;--spin:-180deg;--color:#e68fab\"></i><i style=\"--x:29%;--delay:0.24s;--spin:180deg;--color:#c4bcff\"></i><i style=\"--x:76%;--delay:0.36s;--spin:-180deg;--color:#eacb7e\"></i><i style=\"--x:23%;--delay:0.48s;--spin:180deg;--color:#8dd9c0\"></i><i style=\"--x:70%;--delay:0s;--spin:-180deg;--color:#e68fab\"></i><i style=\"--x:17%;--delay:0.12s;--spin:180deg;--color:#c4bcff\"></i><i style=\"--x:64%;--delay:0.24s;--spin:-180deg;--color:#eacb7e\"></i><i style=\"--x:11%;--delay:0.36s;--spin:180deg;--color:#8dd9c0\"></i><i style=\"--x:58%;--delay:0.48s;--spin:-180deg;--color:#e68fab\"></i><i style=\"--x:5%;--delay:0s;--spin:180deg;--color:#c4bcff\"></i><i style=\"--x:52%;--delay:0.12s;--spin:-180deg;--color:#eacb7e\"></i><i style=\"--x:99%;--delay:0.24s;--spin:180deg;--color:#8dd9c0\"></i><i style=\"--x:46%;--delay:0.36s;--spin:-180deg;--color:#e68fab\"></i><i style=\"--x:93%;--delay:0.48s;--spin:180deg;--color:#c4bcff\"></i></div>";
+import { drawPiece } from './pieces.js';
 import { g } from './chess-i18n.js';
 
-const SIZE = 512, CELL = SIZE / 8;
+const SIZE = 768, CELL = SIZE / 8;
 const GLYPH = { k: '♚', q: '♛', r: '♜', b: '♝', n: '♞', p: '♟' };
 const FILES = 'abcdefgh';
 const clock = ms => { const n = Math.ceil(Math.max(0, ms) / 1000); return `${Math.floor(n / 60)}:${String(n % 60).padStart(2, '0')}`; };
@@ -10,6 +12,8 @@ const EMPTY = { board: '.'.repeat(64), turn: 'w', whiteMs: 0, blackMs: 0, legal:
 export function createChessView(app, role, { send, notice, preference = () => {} }) {
   let s, online = false, contentKey = null, dead = false, lastEvent = 0, rendered = '';
   let canvas, ctx, selected = null, pendingPromotion = null;
+  let previousBoard = null, animation = null, animationFrame = 0;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const cache = new Map();
   const soundKey = 'museum-sound-muted-' + role;
   let muted = false;
@@ -57,9 +61,10 @@ export function createChessView(app, role, { send, notice, preference = () => {}
   };
 
   function write(selector, property, value) {
-    if (cache.get(selector) === value) return;
+    const cacheKey = selector + ":" + property;
+    if (cache.get(cacheKey) === value) return;
     const element = app.querySelector(selector);
-    if (element) { element[property] = value; cache.set(selector, value); }
+    if (element) { element[property] = value; cache.set(cacheKey, value); }
   }
 
   function mount() {
@@ -104,7 +109,9 @@ export function createChessView(app, role, { send, notice, preference = () => {}
       const column = display & 7, row = display >> 3;
       const x = column * CELL, y = row * CELL;
       const light = ((index >> 3) + (index & 7)) % 2 === 1;
-      ctx.fillStyle = light ? '#ecd9b0' : '#8a5a3b';
+      const tile=ctx.createLinearGradient(x,y,x+CELL,y+CELL);
+      tile.addColorStop(0,light?'#244a4a':'#e6e2cd');tile.addColorStop(1,light?'#193b3d':'#cecbb4');
+      ctx.fillStyle=tile;
       ctx.fillRect(x, y, CELL, CELL);
       const square = squareName(index);
       if (last.from === square || last.to === square) {
@@ -116,27 +123,16 @@ export function createChessView(app, role, { send, notice, preference = () => {}
         ctx.fillRect(x, y, CELL, CELL);
       }
       if (column === 0) {
-        ctx.fillStyle = light ? '#8a5a3b' : '#ecd9b0';
+        ctx.fillStyle = light ? '#a3c4b6' : '#426362';
         ctx.font = '11px system-ui';
         ctx.textAlign = 'left';
         ctx.fillText(String(8 - (index >> 3)), x + 4, y + 12);
         ctx.textAlign = 'center';
       }
       if (row === 7) {
-        ctx.fillStyle = light ? '#8a5a3b' : '#ecd9b0';
+        ctx.fillStyle = light ? '#a3c4b6' : '#426362';
         ctx.font = '11px system-ui';
         ctx.fillText(FILES[index & 7], x + CELL - 10, y + CELL - 10);
-      }
-      const piece = state.board[index];
-      if (piece && piece !== '.') {
-        const white = piece < 'a';
-        const glyph = GLYPH[piece.toLowerCase()];
-        ctx.font = `${Math.floor(CELL * .74)}px serif`;
-        ctx.lineWidth = CELL * .06;
-        ctx.strokeStyle = white ? '#3a2c15' : '#c9b896';
-        ctx.fillStyle = white ? '#f5ead0' : '#1c1310';
-        ctx.strokeText(glyph, x + CELL / 2, y + CELL / 2 + CELL * .04);
-        ctx.fillText(glyph, x + CELL / 2, y + CELL / 2 + CELL * .04);
       }
       if (selected === square) {
         ctx.strokeStyle = '#64ddff';
@@ -145,16 +141,37 @@ export function createChessView(app, role, { send, notice, preference = () => {}
       } else if (targets.has(square)) {
         ctx.fillStyle = 'rgba(100, 221, 255, .55)';
         ctx.beginPath();
-        ctx.arc(x + CELL / 2, y + CELL / 2, CELL * .13, 0, 7);
-        ctx.fill();
+        const capture=state.board[index]!=='.';
+        ctx.arc(x + CELL / 2, y + CELL / 2, CELL * (capture ? .43 : .13), 0, 7);
+        if(capture){ctx.strokeStyle='#89dbbd';ctx.lineWidth=4;ctx.stroke();}else ctx.fill();
       }
     }
-    rendered = [state.board, state.lastMove?.from, state.lastMove?.to, selected, flip, state.check].join('|');
+    const t = animation ? Math.min(1, (performance.now()-animation.start)/260) : 1;
+    const eased=1-Math.pow(1-t,3);
+    const coords=index=>{const n=flip?63-index:index;return [(n&7)*CELL,(n>>3)*CELL];};
+    for(let index=0;index<64;index++){
+      const piece=state.board[index];if(!piece||piece==='.'||animation?.to===index)continue;
+      const [x,y]=coords(index);drawPiece(ctx,piece,x+CELL*.08,y+CELL*.04,CELL*.84);
+    }
+    if(animation){
+      const [x1,y1]=coords(animation.from),[x2,y2]=coords(animation.to);
+      drawPiece(ctx,animation.piece,x1+(x2-x1)*eased+CELL*.08,y1+(y2-y1)*eased+CELL*.04-Math.sin(t*Math.PI)*CELL*.12,CELL*.84);
+      if(t>=1)animation=null;
+    }
   }
+  function boardKey(){const state=chess();return [state.board,state.lastMove?.from,state.lastMove?.to,selected,orientation(),state.check].join('|');}
   function paint() {
-    const state = chess();
-    const key = [state.board, state.lastMove?.from, state.lastMove?.to, selected, orientation(), state.check].join('|');
-    if (key !== rendered) drawBoard();
+    const state=chess(),key=boardKey();
+    if(state.board!==previousBoard){
+      if(previousBoard&&state.lastMove&&!reducedMotion.matches&&s.phase==='playing'){
+        const from=squareIndex(state.lastMove.from),to=squareIndex(state.lastMove.to);
+        if(previousBoard[from]!=='.'&&state.board[to]!=='.')animation={from,to,piece:state.board[to],start:performance.now()};
+      }
+      previousBoard=state.board;
+    }
+    if(key===rendered&&!animation)return;
+    rendered=key;drawBoard();
+    if(animation&&!animationFrame)animationFrame=requestAnimationFrame(function frame(){animationFrame=0;if(dead)return;drawBoard();if(animation)animationFrame=requestAnimationFrame(frame);});
   }
 
   function playerHtml(color) {
@@ -204,7 +221,7 @@ export function createChessView(app, role, { send, notice, preference = () => {}
       const connected = s.party.players.filter(p => p.connected).length;
       const rematch = role === 'controller'
         ? `<div class="chess-replay"><button class="button primary" data-action="playAgain" ${connected < 2 ? 'disabled' : ''}>${esc(tr('playAgain'))}</button>${connected < 2 ? `<small>${esc(tr('needPlayers'))}</small>` : ''}</div>` : '';
-      return `<div class="chess-overlay"><p class="eyebrow">${esc(tr('result'))}</p><h2>${resultText() || esc(tr(s.party.reason || 'adminEnd'))}</h2>${rematch}</div>`;
+      return `<div class="chess-overlay result-scene">${state.winner ? VICTORY : ''}<p class="eyebrow">${esc(tr('result'))}</p><h2>${resultText() || esc(tr(s.party.reason || 'adminEnd'))}</h2>${rematch}</div>`;
     }
     if (!online) return `<div class="chess-overlay"><h2>${esc(tr('disconnected'))}</h2></div>`;
     return '';
@@ -275,7 +292,7 @@ export function createChessView(app, role, { send, notice, preference = () => {}
     write('[data-fullscreen]', 'textContent', tr('fullscreen'));
     write('[data-sound]', 'textContent', tr(muted ? 'soundOff' : 'soundOn'));
     write('[data-sound]', 'ariaPressed', String(!muted));
-    if (s.party.id !== previousMatch) { lastEvent = 0; selected = null; pendingPromotion = null; }
+    if (s.party.id !== previousMatch) { lastEvent = 0; selected = null; pendingPromotion = null; previousBoard = null; animation = null; }
     const view = chess();
     const key = [role, s.phase, view.winner, view.reason, view.players.map(p => p.id + p.color).join(','), s.party.you, online].join(':');
     if (key !== contentKey) { contentKey = key; cache.clear(); rendered = ''; selected = null; }
@@ -300,5 +317,5 @@ export function createChessView(app, role, { send, notice, preference = () => {}
     paint();
   }
 
-  return { update, setPreferences, dispose() { dead = true; } };
+  return { update, setPreferences, dispose() { dead = true; cancelAnimationFrame(animationFrame); audio.context?.close().catch(() => {}); } };
 }
