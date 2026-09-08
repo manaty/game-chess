@@ -167,7 +167,7 @@ test('invalid and rebel moves are rejected with message keys', () => {
   assert.throws(() => game.move(white, { from: 'z9', to: 'e4' }), /illegalMove/);
   assert.throws(() => game.move(white, { from: 'e2' }), /illegalMove/);
   assert.throws(() => game.move('ghost', { from: 'e2', to: 'e4' }), /notYourTurn/);
-  assert.throws(() => game.action(white, 'resign', {}), /invalidGameAction/);
+  assert.throws(() => game.action(white, 'teleport', {}), /invalidGameAction/);
 });
 
 test('finishTime ends an unfinished duel without a winner', () => {

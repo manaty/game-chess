@@ -173,7 +173,7 @@ const START = parseFen('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
 
 export class Chess {
   constructor(players, saved, options = {}) {
-    this.players = players.map(player => ({ id: player.id, color: 'w' }));
+    this.players = players.map(player => ({ id: player.id, color: 'w', elo: Number.isInteger(player.chessElo)&&player.chessElo>=0&&player.chessElo<=4000?player.chessElo:700 }));
     this.minutes = [3, 5, 10].includes(options.minutes) ? options.minutes : 5;
     this.events = []; this.eventId = 0;
     this.winner = null; this.reason = null;
@@ -202,6 +202,11 @@ export class Chess {
       (this.ep >= 0 && this.legal().some(move => move.epCapture) ? square(this.ep) : '');
   }
   action(id, action, value) {
+    if(action==='resign'){
+      if(this.reason||this.winner)throw Error('gameOver');
+      if(!this.players.some(p=>p.id===id))throw Error('spectator');
+      this.winner=this.players.find(p=>p.id!==id).id;this.reason='resignation';this.record('end',{player:this.winner});return;
+    }
     if (action !== 'move') throw new Error('invalidGameAction');
     return this.move(id, value);
   }
@@ -257,6 +262,11 @@ export class Chess {
     }
   }
   finishTime() { if (!this.winner && !this.reason) { this.reason = 'timeUp'; this.record('end'); } }
+  ratings(){
+    if(!this.reason||this.reason==='timeUp'||this.players.length!==2)return [];
+    return this.players.map(player=>{const before=player.elo??700,opponent=this.players.find(p=>p.id!==player.id),expected=1/(1+10**(((opponent.elo??700)-before)/400)),score=this.winner?(this.winner===player.id?1:0):.5;
+      const after=Math.max(0,Math.min(4000,Math.round(before+32*(score-expected))));return {id:player.id,before,after,delta:after-before};});
+  }
   snapshot() {
     return {
       board: this.board.map(piece => piece || '.').join(''),
@@ -269,7 +279,7 @@ export class Chess {
       lastMove: this.lastMove,
       check: !this.winner && !this.reason && this.inCheck(),
       history: this.history,
-      players: this.players.map(({ id, color }) => ({ id, color })),
+      players: this.players.map(({ id, color, elo }) => ({ id, color, elo:elo??700 })), ratings:this.ratings(),
       winner: this.winner, reason: this.reason, events: this.events,
     };
   }

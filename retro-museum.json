@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "chess",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "title": {
     "en": "Chess · Blitz duel",
     "fr": "Échecs · Duel blitz",
@@ -43,5 +43,6 @@
       ],
       "default": 5
     }
-  }
+  },
+  "autoStartWhenFull": true
 }

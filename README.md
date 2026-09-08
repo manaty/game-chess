@@ -48,3 +48,12 @@ This is casual chess: threefold repetition and fifty moves trigger an automatic 
 Emerald and ivory board, original vector pieces with shaded relief, animated moves, prominent clocks and a trophy/confetti finish. Animations respect reduced-motion preferences and finish automatically. Unchanged server snapshots do not repaint the board.
 
 Browser checks cover 320px/390px portrait phones, landscape phones and 960px/1280px/1920px shared displays. Run `npx playwright install chromium`, then `npm run test:browser`; CI runs these checks too. Physical legacy TVs remain untested.
+# Session improvements in 1.2.0
+
+Chess starts automatically when the second distinct controller connects. The organiser can disable automatic start or choose the blitz duration before players arrive. Read-only displays and abandoned join forms do not fill a seat.
+
+On the first visit, each player enters a starting Elo (700 by default, 0–4000). This informal rating is stored in the browser on the current site. Each completed chess match recalculates both ratings using K=32, with 1 / 0.5 / 0 for win / draw / loss; organiser cancellations and the overall activity time limit do not count. The result shows the old rating, new rating and change. Refreshing never counts a result twice; rematches use the updated ratings. Clearing browser storage, changing browser or changing host origin creates a separate local profile. These are not federation or verified online ratings.
+
+Players can resign from their phone, even when it is the opponent's turn, with an explicit confirmation. The opponent wins and both Elo ratings are updated. A transient disconnection does not itself count as resignation.
+
+Validation: 23 engine/package/host tests, six viewport/role layouts, and a full browser session with two isolated phone profiles covering initial Elo, automatic start, cancellation/confirmation of resignation, refreshed local storage and rematch. The SDK additionally tests duplicate controller tabs, organiser-only settings, manual mode, paused/finished games and result deduplication. EN/FR/TL, sound controls and a seven-move UI checkmate were rechecked against the exact package.

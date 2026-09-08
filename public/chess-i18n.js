@@ -1,5 +1,12 @@
 // Translations as [fr, en, tl]; English is the fallback.
 const WORDS = {
+  resign:['Abandonner','Resign','Sumuko'],
+  resignConfirm:['Abandonner ce duel ? Votre adversaire gagnera et les Elo seront recalculés.','Resign this duel? Your opponent will win and both ratings will be updated.','Sumuko sa laban? Mananalo ang kalaban at maa-update ang mga rating.'],
+  confirmResign:['Oui, abandonner','Yes, resign','Oo, sumuko'],
+  cancel:['Continuer à jouer','Keep playing','Magpatuloy sa laro'],
+  resignation:['{player} gagne par abandon','{player} wins by resignation','Panalo si {player} dahil sumuko ang kalaban'],
+  waitingStart:['Deux joueurs connectés. L’hôte peut démarrer la partie.','Both players are connected. The organiser can start the game.','Konektado ang dalawang manlalaro. Maaaring simulan ng host ang laro.'],
+  localElo:['Elo local','Local Elo','Lokal na Elo'],
   soundOn: ['Son activé', 'Sound on', 'May tunog'],
   soundOff: ['Son coupé', 'Sound off', 'Walang tunog'],
   title: ['Échecs · Duel blitz', 'Chess · Blitz duel', 'Ahedres · Blitz duel'],

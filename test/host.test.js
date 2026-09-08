@@ -50,12 +50,13 @@ test('a full duel runs through the real host', { skip: built ? false : 'run npm 
   });
   try {
     const room = await (await post('/api/rooms', { game: 'chess' })).json();
+    assert.equal((await post('/api/rooms/' + room.id + '/control', {action:'configure',options:{minutes:3}}, room.hostToken)).status,200);
     const alice = await (await post('/api/rooms/' + room.id + '/join', { profile: { name: 'Alice' } })).json();
     const bob = await (await post('/api/rooms/' + room.id + '/join', { profile: { name: 'Bob' } })).json();
     const alicePhone = await connect(room.id, 'controller', alice.token);
     const bobPhone = await connect(room.id, 'controller', bob.token);
     const display = await connect(room.id, 'display');
-    assert.equal((await post('/api/rooms/' + room.id + '/control', { action: 'start', options: { minutes: 3 } }, room.hostToken)).status, 200);
+    assert.equal(host.rooms.get(room.id).party.phase,'intro','second controller starts without an organiser click');
 
     const playing = await waitFor(alicePhone, state => state.phase === 'playing', 'playing phase');
     const matchId = playing.party.id;

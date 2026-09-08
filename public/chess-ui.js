@@ -11,7 +11,7 @@ const EMPTY = { board: '.'.repeat(64), turn: 'w', whiteMs: 0, blackMs: 0, legal:
 
 export function createChessView(app, role, { send, notice, preference = () => {} }) {
   let s, online = false, contentKey = null, dead = false, lastEvent = 0, rendered = '';
-  let canvas, ctx, selected = null, pendingPromotion = null;
+  let canvas, ctx, selected = null, pendingPromotion = null, confirmingResign = false;
   let previousBoard = null, animation = null, animationFrame = 0;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const cache = new Map();
@@ -84,7 +84,7 @@ export function createChessView(app, role, { send, notice, preference = () => {}
           </aside>
           <div class="chess-overlay-slot"></div>
         </main>
-        <footer class="chess-footer"><span></span><span></span></footer>
+        <footer class="chess-footer"><span></span><button class="button" data-resign hidden></button><span></span></footer>
       </div>`;
     canvas = app.querySelector('.chess-canvas');
     ctx = canvas.getContext('2d');
@@ -187,13 +187,14 @@ export function createChessView(app, role, { send, notice, preference = () => {}
     return `
       ${avatar || `<span class="badge ${color}">${color === 'w' ? '♔' : '♚'}</span>`}
       <span class="who"><strong>${esc(player ? name(player.id) : '—')}</strong>
-        <small>${color === 'w' ? esc(tr('white')) : esc(tr('black'))}${player && s.party.you === player.id ? ' · ' + esc(tr('you')) : ''}</small></span>
+        <small>${color === 'w' ? esc(tr('white')) : esc(tr('black'))}${player && s.party.you === player.id ? ' · ' + esc(tr('you')) : ''}${player?' · Elo '+(player.elo??700):''}</small></span>
       <span class="clock ${running ? '' : 'off'} ${running && ms < 10500 ? 'urgent' : ''}">${clock(ms)}</span>`.trim();
   }
 
   function resultText() {
     const state = chess();
     if (state.reason === 'checkmate') return esc(tr('checkmate', { player: name(state.winner) }));
+    if (state.reason === 'resignation') return esc(tr('resignation', {player:name(state.winner)}));
     if (state.reason === 'timeout') return esc(tr('timeout', { player: name(state.winner) }));
     if (state.reason === 'stalemate') return esc(tr('stalemate'));
     if (state.reason === 'fiftyMoves') return esc(tr('fiftyMoves'));
@@ -205,13 +206,14 @@ export function createChessView(app, role, { send, notice, preference = () => {}
 
   function overlayHtml() {
     const state = chess();
+    if(confirmingResign&&s.phase==='playing')return '<div class="chess-overlay" role="alertdialog" aria-modal="true"><h2>'+esc(tr('resign'))+'</h2><p>'+esc(tr('resignConfirm'))+'</p><button class="button" data-cancel-resign>'+esc(tr('cancel'))+'</button><button class="button primary" data-confirm-resign>'+esc(tr('confirmResign'))+'</button></div>';
     if (pendingPromotion)
       return `<div class="chess-overlay"><p class="eyebrow">${esc(tr('choosePromotion'))}</p>
         <div class="chess-promotion">
           ${['q', 'r', 'b', 'n'].map(piece => `<button class="button primary" data-promotion="${piece}">${GLYPH[piece]}</button>`).join('')}
         </div></div>`;
     if (s.phase === 'ready')
-      return `<div class="chess-overlay"><p class="eyebrow">${esc(tr('players', { n: s.party.players.length }))}</p><h2>${esc(tr('lobby'))}</h2><p class="rules">${esc(tr('rules'))}</p><p>${esc(tr('waiting'))}</p></div>`;
+      return `<div class="chess-overlay"><p class="eyebrow">${esc(tr('players', { n: s.party.players.length }))}</p><h2>${esc(tr('lobby'))}</h2><p class="rules">${esc(tr('rules'))}</p><p>${esc(tr(s.party.players.filter(p=>p.connected).length>=2?'waitingStart':'waiting'))}</p></div>`;
     if (s.phase === 'intro')
       return `<div class="chess-overlay"><div class="chess-countdown">${Math.max(1, Math.ceil((s.introRemainingMs || 0) / 1000))}</div>
         <p>${esc(tr('playsWhite', { player: name(state.players.find(p => p.color === 'w')?.id) }))}<br>${esc(tr('playsBlack', { player: name(state.players.find(p => p.color === 'b')?.id) }))}</p></div>`;
@@ -221,7 +223,7 @@ export function createChessView(app, role, { send, notice, preference = () => {}
       const connected = s.party.players.filter(p => p.connected).length;
       const rematch = role === 'controller'
         ? `<div class="chess-replay"><button class="button primary" data-action="playAgain" ${connected < 2 ? 'disabled' : ''}>${esc(tr('playAgain'))}</button>${connected < 2 ? `<small>${esc(tr('needPlayers'))}</small>` : ''}</div>` : '';
-      return `<div class="chess-overlay result-scene">${state.winner ? VICTORY : ''}<p class="eyebrow">${esc(tr('result'))}</p><h2>${resultText() || esc(tr(s.party.reason || 'adminEnd'))}</h2>${rematch}</div>`;
+      return `<div class="chess-overlay result-scene">${state.winner ? VICTORY : ''}<p class="eyebrow">${esc(tr('result'))}</p><h2>${resultText() || esc(tr(s.party.reason || 'adminEnd'))}</h2>${(state.ratings||[]).map(r=>`<p class="rating-result">${esc(name(r.id))} · ${esc(tr('localElo'))} ${r.before} → <strong>${r.after}</strong> (${r.delta>=0?'+':''}${r.delta})</p>`).join('')}${rematch}</div>`;
     }
     if (!online) return `<div class="chess-overlay"><h2>${esc(tr('disconnected'))}</h2></div>`;
     return '';
@@ -273,6 +275,9 @@ export function createChessView(app, role, { send, notice, preference = () => {}
     tapSquare(squareName(orientation() === 'b' ? 63 - display : display));
   });
   app.addEventListener('click', event => {
+    if(event.target.closest('[data-resign]')&&canControl()&&myColor()){confirmingResign=true;write('.chess-overlay-slot','innerHTML',overlayHtml());app.querySelector('[data-cancel-resign]')?.focus();return;}
+    if(event.target.closest('[data-cancel-resign]')){confirmingResign=false;write('.chess-overlay-slot','innerHTML',overlayHtml());return;}
+    if(event.target.closest('[data-confirm-resign]')&&confirmingResign){confirmingResign=false;doSend('resign');write('.chess-overlay-slot','innerHTML',overlayHtml());return;}
     const promotion = event.target.closest('[data-promotion]');
     if (promotion && pendingPromotion) {
       const pending = pendingPromotion;
@@ -289,10 +294,12 @@ export function createChessView(app, role, { send, notice, preference = () => {}
     s = state; online = connected;
     if (!app.querySelector('.chess-shell')) mount();
     write('h1', 'textContent', tr('title'));
+    write('[data-resign]','textContent',tr('resign'));write('[data-resign]','hidden',!canControl()||!myColor());
     write('[data-fullscreen]', 'textContent', tr('fullscreen'));
     write('[data-sound]', 'textContent', tr(muted ? 'soundOff' : 'soundOn'));
     write('[data-sound]', 'ariaPressed', String(!muted));
-    if (s.party.id !== previousMatch) { lastEvent = 0; selected = null; pendingPromotion = null; previousBoard = null; animation = null; }
+    if(s.phase!=='playing')confirmingResign=false;
+    if (s.party.id !== previousMatch) { confirmingResign=false; lastEvent = 0; selected = null; pendingPromotion = null; previousBoard = null; animation = null; }
     const view = chess();
     const key = [role, s.phase, view.winner, view.reason, view.players.map(p => p.id + p.color).join(','), s.party.you, online].join(':');
     if (key !== contentKey) { contentKey = key; cache.clear(); rendered = ''; selected = null; }

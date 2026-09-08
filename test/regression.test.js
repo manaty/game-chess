@@ -49,7 +49,7 @@ test('host recognizes no-winner completion and replays with connected late playe
  const pack=JSON.parse(await readFile(new URL('../dist/game.rmg.json',import.meta.url)));
  const party=new RoomParty({definition:{pack}});
  try{
-  party.join('a');party.join('b');party.admin('start');party.join('late');
+  party.join('a');party.join('b');assert.equal(party.phase,'intro');party.join('late');
   party.engine.action(null,'hostTimeUp');party.finish();
   assert.equal(party.phase,'ended');assert.equal(party.engine.winner,null);
   party.leave('a');party.admin('playAgain');party.admin('start');

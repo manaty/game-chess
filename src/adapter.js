@@ -12,7 +12,7 @@ globalThis.RetroMuseumGame = {
       save() { return game.save(); },
       release(id) { return game.release(id); },
       addPlayer() { /* The duel is full; new arrivals spectate. */ },
-      status() { return { winner: game.winner, ended: Boolean(game.reason), requiredPlayers: game.reason ? [] : players.map(p => p.id) }; },
+      status() { return { winner: game.winner, ratings:game.ratings(), ended: Boolean(game.reason), requiredPlayers: game.reason ? [] : players.map(p => p.id) }; },
     };
   },
 };

@@ -118,7 +118,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
   max-height: calc(100dvh - 230px);
 }
 .controller .chess-history { display: none; }
-.controller .chess-footer { display: none; }
+.controller .chess-footer { display: flex; flex-shrink: 0; justify-content: flex-end; padding: 4px 10px; }
+.controller .chess-footer span { display: none; }
+.controller .chess-footer .button { padding: 6px 14px; font-size: 12px; }
 
 /* Landscape phones: board left, players and status right */
 @media (orientation: landscape) and (max-height: 520px) {
