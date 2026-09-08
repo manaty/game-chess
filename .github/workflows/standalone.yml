@@ -1,0 +1,20 @@
+name: Standalone game
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  game:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - run: npm test
+      - uses: manaty/retro-museum-sdk@v1
+        with:
+          path: .

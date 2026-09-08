@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "chess",
+  "version": "1.0.0",
+  "title": {
+    "en": "Chess · Blitz duel",
+    "fr": "Échecs · Duel blitz",
+    "tl": "Ahedres · Blitz duel"
+  },
+  "description": {
+    "en": "A two-player chess duel with blitz clocks on the shared screen. Full rules: castling, promotion and every draw.",
+    "fr": "Un duel d'échecs à deux avec horloges blitz sur l'écran partagé. Règles complètes : roque, promotion et toutes les nulles.",
+    "tl": "Duel na ahedres para sa dalawa na may blitz na orasan sa shared screen. Kumpletong patakaran."
+  },
+  "author": "Manaty",
+  "license": "MIT",
+  "languages": [
+    "en",
+    "fr",
+    "tl"
+  ],
+  "players": {
+    "min": 2,
+    "max": 2
+  },
+  "durationMinutes": 25,
+  "introMs": 3000,
+  "runtime": "quickjs-v1",
+  "entry": "dist/game.rmg.json",
+  "permissions": [],
+  "activityKey": "chess",
+  "options": {
+    "minutes": {
+      "label": {
+        "en": "Minutes per player",
+        "fr": "Minutes par joueur",
+        "tl": "Minuto bawat manlalaro"
+      },
+      "values": [
+        3,
+        5,
+        10
+      ],
+      "default": 5
+    }
+  }
+}
