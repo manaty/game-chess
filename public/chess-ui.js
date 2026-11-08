@@ -187,7 +187,7 @@ export function createChessView(app, role, { send, notice, preference = () => {}
     return `
       ${avatar || `<span class="badge ${color}">${color === 'w' ? '♔' : '♚'}</span>`}
       <span class="who"><strong>${esc(player ? name(player.id) : '—')}</strong>
-        <small>${color === 'w' ? esc(tr('white')) : esc(tr('black'))}${player && s.party.you === player.id ? ' · ' + esc(tr('you')) : ''}${player?' · Elo '+(player.elo??700):''}</small></span>
+        <small>${color === 'w' ? esc(tr('white')) : esc(tr('black'))}${player && s.party.you === player.id ? ' · ' + esc(tr('you')) : ''}${profile?.bot?' · '+esc(tr('bot'+profile.difficulty[0].toUpperCase()+profile.difficulty.slice(1))):player&&!s.party.players.some(p=>p.bot)?' · Elo '+(player.elo??700):''}</small></span>
       <span class="clock ${running ? '' : 'off'} ${running && ms < 10500 ? 'urgent' : ''}">${clock(ms)}</span>`.trim();
   }
 
@@ -206,7 +206,7 @@ export function createChessView(app, role, { send, notice, preference = () => {}
 
   function overlayHtml() {
     const state = chess();
-    if(confirmingResign&&s.phase==='playing')return '<div class="chess-overlay" role="alertdialog" aria-modal="true"><h2>'+esc(tr('resign'))+'</h2><p>'+esc(tr('resignConfirm'))+'</p><button class="button" data-cancel-resign>'+esc(tr('cancel'))+'</button><button class="button primary" data-confirm-resign>'+esc(tr('confirmResign'))+'</button></div>';
+    if(confirmingResign&&s.phase==='playing')return '<div class="chess-overlay" role="alertdialog" aria-modal="true"><h2>'+esc(tr('resign'))+'</h2><p>'+esc(tr(s.party.players.some(p=>p.bot)?'resignPracticeConfirm':'resignConfirm'))+'</p><button class="button" data-cancel-resign>'+esc(tr('cancel'))+'</button><button class="button primary" data-confirm-resign>'+esc(tr('confirmResign'))+'</button></div>';
     if (pendingPromotion)
       return `<div class="chess-overlay"><p class="eyebrow">${esc(tr('choosePromotion'))}</p>
         <div class="chess-promotion">

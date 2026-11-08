@@ -173,7 +173,7 @@ const START = parseFen('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
 
 export class Chess {
   constructor(players, saved, options = {}) {
-    this.players = players.map(player => ({ id: player.id, color: 'w', elo: Number.isInteger(player.chessElo)&&player.chessElo>=0&&player.chessElo<=4000?player.chessElo:700 }));
+    this.players = players.map(player => ({ id: player.id, bot:player.bot===true, color: 'w', elo: Number.isInteger(player.chessElo)&&player.chessElo>=0&&player.chessElo<=4000?player.chessElo:700 }));
     this.minutes = [3, 5, 10].includes(options.minutes) ? options.minutes : 5;
     this.events = []; this.eventId = 0;
     this.winner = null; this.reason = null;
@@ -263,7 +263,7 @@ export class Chess {
   }
   finishTime() { if (!this.winner && !this.reason) { this.reason = 'timeUp'; this.record('end'); } }
   ratings(){
-    if(!this.reason||this.reason==='timeUp'||this.players.length!==2)return [];
+    if(!this.reason||this.reason==='timeUp'||this.players.length!==2||this.players.some(p=>p.bot))return [];
     return this.players.map(player=>{const before=player.elo??700,opponent=this.players.find(p=>p.id!==player.id),expected=1/(1+10**(((opponent.elo??700)-before)/400)),score=this.winner?(this.winner===player.id?1:0):.5;
       const after=Math.max(0,Math.min(4000,Math.round(before+32*(score-expected))));return {id:player.id,before,after,delta:after-before};});
   }

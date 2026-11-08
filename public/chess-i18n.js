@@ -1,5 +1,7 @@
 // Translations as [fr, en, tl]; English is the fallback.
 const WORDS = {
+  botEasy:['Robot facile','Easy robot','Madaling robot'],botMedium:['Robot moyen','Medium robot','Katamtamang robot'],botHard:['Robot difficile','Hard robot','Mahirap na robot'],
+  resignPracticeConfirm:['Abandonner cette partie d’entraînement ? Votre classement ne changera pas.','Resign this practice game? Your rating will not change.','Sumuko sa pagsasanay? Hindi magbabago ang rating mo.'],
   resign:['Abandonner','Resign','Sumuko'],
   resignConfirm:['Abandonner ce duel ? Votre adversaire gagnera et les Elo seront recalculés.','Resign this duel? Your opponent will win and both ratings will be updated.','Sumuko sa laban? Mananalo ang kalaban at maa-update ang mga rating.'],
   confirmResign:['Oui, abandonner','Yes, resign','Oo, sumuko'],

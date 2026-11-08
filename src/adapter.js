@@ -1,3 +1,4 @@
+import {chooseChessAction} from '../server/bot.js';
 import { Chess } from '../server/chess.js';
 globalThis.RetroMuseumGame = {
   create(players, saved, options = {}) {
@@ -7,7 +8,7 @@ globalThis.RetroMuseumGame = {
         if (action === 'hostTimeUp') { game.finishTime(); return; }
         return game.action(id, action, value);
       },
-      advance(dt) { return game.advance(dt); },
+      botAction(id,difficulty){return chooseChessAction(game,id,difficulty);},advance(dt) { return game.advance(dt); },
       snapshot(id) { return game.snapshot(id); },
       save() { return game.save(); },
       release(id) { return game.release(id); },

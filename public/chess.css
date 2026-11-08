@@ -178,3 +178,12 @@ button:active:not(:disabled){transform:translateY(1px) scale(.98)}
 button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}.celebration{display:none}}
 @media(max-height:500px){.victory-mark{width:45px;height:45px}.result-scene{gap:6px!important;padding:10px!important}}
+@media(max-width:600px) and (max-height:620px){
+ .controller .chess-header{padding:4px 8px}
+ .controller .chess-header h1{font-size:13px}.controller .chess-header .button{font-size:11px;padding:6px}
+ .controller .chess-stage{gap:7px;padding:6px}.controller .chess-status{font-size:12px;min-height:24px;padding:4px}
+ .controller .chess-player{padding:5px}.controller .chess-player .clock{font-size:19px;padding:3px;margin:0}
+ .controller .chess-player .who strong{font-size:11px}.controller .chess-player .who small{font-size:9px}
+ .controller .chess-canvas{max-width:min(100%,calc(100vh - 165px));max-height:calc(100vh - 165px)}
+ .controller .chess-footer .button{min-height:36px}
+}

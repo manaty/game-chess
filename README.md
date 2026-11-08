@@ -6,6 +6,20 @@ A two-player chess duel with blitz clocks on the shared screen. Each phone shows
 
 An independent, open-source Manaty game. English, French and Tagalog. No Retro Museum installation or account is required to run it.
 
+## Solo with robots
+
+With a bot-capable Retro Museum SDK host, **Play solo** creates a room with one
+human and the required robot opponent. The organiser can add or remove robots
+within the game's player limit and choose Easy, Medium or Hard separately for
+each one before starting. The complete player view opens on a single device;
+no additional screen or QR scan is needed. Bot support requires the updated SDK;
+the repository's pinned older SDK must be updated for a standalone release.
+
+Easy chooses a random legal move. Medium evaluates material and piece activity.
+Hard also examines tactical replies and immediate checkmate within a bounded
+calculation budget. These levels are not calibrated Elo ratings. Games against
+robots are practice and do not change the human's local Elo.
+
 ## Play on your own server
 
 ```sh
